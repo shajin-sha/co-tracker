@@ -1,16 +1,85 @@
-# React + Vite
+# SaaS Outreach Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple, efficient tracker for managing cold outreach campaigns to reach your $500 MRR goal.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Dashboard Analytics**: Real-time funnel metrics and MRR tracking
+- **Entry Management**: Modal popup form for adding/editing prospect entries
+- **Searchable Niches**: 50+ predefined niches for targeted outreach
+- **LocalStorage Persistence**: All data saved automatically in browser
+- **Visual Funnel**: Track conversion rates at each stage
+- **Goal Tracking**: Monitor progress toward $500 MRR target
+- **Responsive Design**: Works on desktop and mobile
 
-## React Compiler
+## Fields Tracked
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Each outreach entry includes:
+- Name & Profile Link
+- Niche (searchable dropdown)
+- Contact Type (DM/Email)
+- First Message Date
+- Replied (Y/N)
+- Sent Concepts (Y/N)
+- Signed Up (Y/N)
+- Paid (Y/N)
+- MRR Amount
+- Notes
 
-## Expanding the ESLint configuration
+## Development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Install dependencies:
+```bash
+npm install
+```
+
+Run development server:
+```bash
+npm run dev
+```
+
+Build for production:
+```bash
+npm run build
+```
+
+## Deploying to GitHub Pages
+
+The app is pre-configured for GitHub Pages deployment. Follow these steps:
+
+### Option 1: Using GitHub Settings (Recommended)
+
+1. Go to your repository on GitHub
+2. Navigate to **Settings** > **Pages**
+3. Under "Build and deployment":
+   - Source: Select **Deploy from a branch**
+   - Branch: Select **claude/saas-outreach-tracker-018ZrThAMYeVWw5XmwqdYKTD**
+   - Folder: Select **/dist**
+4. Click **Save**
+5. GitHub will deploy your site to: `https://<username>.github.io/co-tracker/`
+
+### Option 2: Manual Deployment
+
+1. Build the project:
+   ```bash
+   npm run build
+   ```
+
+2. The built files will be in the `dist` folder and are already committed to this branch
+
+3. Configure GitHub Pages to use the `dist` folder from this branch
+
+### Note
+
+The production build is configured with the base path `/co-tracker/` to work with GitHub Pages. If you deploy elsewhere, update the `base` setting in `vite.config.js`.
+
+## Tech Stack
+
+- React 19
+- Vite 7
+- LocalStorage for persistence
+- Responsive CSS with gradients
+
+## License
+
+MIT
