@@ -26,6 +26,11 @@ const NICHES = [
   "Tuition centers (school level)",
   "Competitive exam coaching (JEE, NEET, UPSC etc)",
   "Language training centers (IELTS, TOEFL, PTE)",
+  "Online tutors and teachers",
+  "Education consultants and counselors",
+  "Test prep tutors (SAT, GRE, GMAT)",
+  "School teachers (private tutoring)",
+  "College professors (side consulting)",
   "Music schools and academies",
   "Dance studios and academies",
   "Art and hobby classes (drawing, crafts, coding for kids)",
@@ -51,7 +56,8 @@ const NICHES = [
   "Barbers and grooming product sellers combined",
   "Printing and stationery shops that sell custom print products",
   "Local sports academies (cricket, football, badminton)",
-  "Small HR/recruitment agencies"
+  "Small HR/recruitment agencies",
+  "Other"
 ];
 
 const STATUS_OPTIONS = [
