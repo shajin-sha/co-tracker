@@ -45,31 +45,31 @@ npm run build
 
 ## Deploying to GitHub Pages
 
-The app is pre-configured for GitHub Pages deployment. Follow these steps:
+The app includes automated GitHub Actions deployment. Follow these simple steps:
 
-### Option 1: Using GitHub Settings (Recommended)
+### Setup (One-Time)
 
 1. Go to your repository on GitHub
 2. Navigate to **Settings** > **Pages**
 3. Under "Build and deployment":
-   - Source: Select **Deploy from a branch**
-   - Branch: Select **claude/saas-outreach-tracker-018ZrThAMYeVWw5XmwqdYKTD**
-   - Folder: Select **/dist**
-4. Click **Save**
-5. GitHub will deploy your site to: `https://<username>.github.io/co-tracker/`
+   - **Source**: Select **GitHub Actions**
+4. That's it! The workflow will automatically deploy on every push
 
-### Option 2: Manual Deployment
+### Automatic Deployment
 
-1. Build the project:
-   ```bash
-   npm run build
-   ```
+The app will automatically build and deploy to GitHub Pages whenever you push to this branch. The workflow:
+- Installs dependencies
+- Builds the production version
+- Deploys to: `https://shajin-sha.github.io/co-tracker/`
 
-2. The built files will be in the `dist` folder and are already committed to this branch
+### Manual Deployment
 
-3. Configure GitHub Pages to use the `dist` folder from this branch
+If you need to deploy manually or trigger a deployment:
+1. Go to **Actions** tab in GitHub
+2. Select "Deploy to GitHub Pages" workflow
+3. Click **Run workflow**
 
-### Note
+### Important Note
 
 The production build is configured with the base path `/co-tracker/` to work with GitHub Pages. If you deploy elsewhere, update the `base` setting in `vite.config.js`.
 
