@@ -54,6 +54,26 @@ const NICHES = [
   "Small HR/recruitment agencies"
 ];
 
+const STATUS_OPTIONS = [
+  "Contacted",
+  "No Reply",
+  "Follow Up Sent",
+  "Replied",
+  "Rejected",
+  "Qualified",
+  "Negotiating",
+  "Converted"
+];
+
+// Get today's date in YYYY-MM-DD format
+const getTodayDate = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 function App() {
   const [entries, setEntries] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -63,7 +83,8 @@ function App() {
     profileLink: '',
     niche: '',
     contactType: 'DM',
-    firstMessageDate: '',
+    status: 'Contacted',
+    firstMessageDate: getTodayDate(),
     replied: false,
     sentConcepts: false,
     signedUp: false,
@@ -127,7 +148,8 @@ function App() {
       profileLink: '',
       niche: '',
       contactType: 'DM',
-      firstMessageDate: '',
+      status: 'Contacted',
+      firstMessageDate: getTodayDate(),
       replied: false,
       sentConcepts: false,
       signedUp: false,
@@ -162,11 +184,56 @@ function App() {
   const paidCount = entries.filter(e => e.paid).length;
   const totalMRR = entries.filter(e => e.paid).reduce((sum, e) => sum + Number(e.mrr || 0), 0);
 
+  // Status-based metrics
+  const statusCounts = STATUS_OPTIONS.reduce((acc, status) => {
+    acc[status] = entries.filter(e => e.status === status).length;
+    return acc;
+  }, {});
+
+  const noReplyCount = statusCounts["No Reply"] || 0;
+  const rejectedCount = statusCounts["Rejected"] || 0;
+  const followUpCount = statusCounts["Follow Up Sent"] || 0;
+
+  // Calculate drop-off rates
   const replyRate = totalEntries > 0 ? ((repliedCount / totalEntries) * 100).toFixed(1) : 0;
   const conceptRate = repliedCount > 0 ? ((sentConceptsCount / repliedCount) * 100).toFixed(1) : 0;
   const signupRate = sentConceptsCount > 0 ? ((signedUpCount / sentConceptsCount) * 100).toFixed(1) : 0;
   const paidRate = signedUpCount > 0 ? ((paidCount / signedUpCount) * 100).toFixed(1) : 0;
   const overallConversion = totalEntries > 0 ? ((paidCount / totalEntries) * 100).toFixed(2) : 0;
+
+  // Drop-off analysis
+  const contactedButNoReply = totalEntries - repliedCount;
+  const repliedButNoConcepts = repliedCount - sentConceptsCount;
+  const conceptsButNoSignup = sentConceptsCount - signedUpCount;
+  const signedUpButNotPaid = signedUpCount - paidCount;
+
+  // Niche analysis
+  const nicheBreakdown = entries.reduce((acc, entry) => {
+    if (!acc[entry.niche]) {
+      acc[entry.niche] = { total: 0, replied: 0, paid: 0, mrr: 0 };
+    }
+    acc[entry.niche].total++;
+    if (entry.replied) acc[entry.niche].replied++;
+    if (entry.paid) {
+      acc[entry.niche].paid++;
+      acc[entry.niche].mrr += Number(entry.mrr || 0);
+    }
+    return acc;
+  }, {});
+
+  const topNiches = Object.entries(nicheBreakdown)
+    .map(([niche, data]) => ({
+      niche,
+      ...data,
+      replyRate: ((data.replied / data.total) * 100).toFixed(1),
+      conversionRate: ((data.paid / data.total) * 100).toFixed(1)
+    }))
+    .sort((a, b) => b.mrr - a.mrr)
+    .slice(0, 5);
+
+  const getStatusBadgeClass = (status) => {
+    return `status-badge ${status.toLowerCase().replace(/ /g, '-')}`;
+  };
 
   return (
     <div className="app">
@@ -232,6 +299,124 @@ function App() {
           </div>
         </div>
 
+        <div className="reports-section">
+          <h3>Detailed Analytics & Drop-Off Report</h3>
+
+          <div className="report-grid">
+            <div className="report-card">
+              <h4>Status Breakdown</h4>
+              <div className="report-item">
+                <span className="report-label">No Reply</span>
+                <span className="report-value negative">{noReplyCount} ({totalEntries > 0 ? ((noReplyCount/totalEntries)*100).toFixed(1) : 0}%)</span>
+              </div>
+              <div className="report-item">
+                <span className="report-label">Follow Up Sent</span>
+                <span className="report-value">{followUpCount}</span>
+              </div>
+              <div className="report-item">
+                <span className="report-label">Rejected</span>
+                <span className="report-value negative">{rejectedCount}</span>
+              </div>
+              <div className="report-item">
+                <span className="report-label">Qualified</span>
+                <span className="report-value positive">{statusCounts["Qualified"] || 0}</span>
+              </div>
+              <div className="report-item">
+                <span className="report-label">Negotiating</span>
+                <span className="report-value">{statusCounts["Negotiating"] || 0}</span>
+              </div>
+            </div>
+
+            <div className="report-card">
+              <h4>Drop-Off Analysis</h4>
+              <div className="report-item">
+                <span className="report-label">Contacted but no reply</span>
+                <span className="report-value negative">{contactedButNoReply} lost</span>
+              </div>
+              <div className="report-item">
+                <span className="report-label">Replied but no concepts</span>
+                <span className="report-value negative">{repliedButNoConcepts} lost</span>
+              </div>
+              <div className="report-item">
+                <span className="report-label">Concepts but no signup</span>
+                <span className="report-value negative">{conceptsButNoSignup} lost</span>
+              </div>
+              <div className="report-item">
+                <span className="report-label">Signed up but not paid</span>
+                <span className="report-value negative">{signedUpButNotPaid} lost</span>
+              </div>
+              <div className="report-item">
+                <span className="report-label">Total Lost Opportunities</span>
+                <span className="report-value negative">{contactedButNoReply + repliedButNoConcepts + conceptsButNoSignup + signedUpButNotPaid}</span>
+              </div>
+            </div>
+
+            <div className="report-card">
+              <h4>Where Most People Drop Off</h4>
+              {totalEntries > 0 ? (
+                <>
+                  <div className="report-item">
+                    <span className="report-label">1st Biggest Drop-Off</span>
+                    <span className="report-value negative">
+                      {contactedButNoReply >= repliedButNoConcepts && contactedButNoReply >= conceptsButNoSignup && contactedButNoReply >= signedUpButNotPaid
+                        ? `No Reply Stage (${contactedButNoReply})`
+                        : repliedButNoConcepts >= conceptsButNoSignup && repliedButNoConcepts >= signedUpButNotPaid
+                        ? `After Reply (${repliedButNoConcepts})`
+                        : conceptsButNoSignup >= signedUpButNotPaid
+                        ? `After Concepts (${conceptsButNoSignup})`
+                        : `After Signup (${signedUpButNotPaid})`}
+                    </span>
+                  </div>
+                  <div className="report-item">
+                    <span className="report-label">Reply Rate</span>
+                    <span className={`report-value ${replyRate >= 20 ? 'positive' : replyRate >= 10 ? '' : 'negative'}`}>{replyRate}%</span>
+                  </div>
+                  <div className="report-item">
+                    <span className="report-label">Action Needed</span>
+                    <span className="report-value">
+                      {replyRate < 10 ? 'Improve messaging' : replyRate < 20 ? 'Follow up more' : 'Keep going!'}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="report-item">
+                  <span className="report-label">No data yet</span>
+                  <span className="report-value">Start adding entries</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {topNiches.length > 0 && (
+            <>
+              <h4 style={{marginTop: '2rem', marginBottom: '1rem', color: '#1f2937'}}>Top Performing Niches</h4>
+              <div className="report-grid">
+                {topNiches.map(({ niche, total, replied, paid, mrr, replyRate, conversionRate }) => (
+                  <div key={niche} className="report-card">
+                    <h4 style={{fontSize: '0.9rem', marginBottom: '0.75rem'}}>{niche}</h4>
+                    <div className="report-item">
+                      <span className="report-label">Total Contacted</span>
+                      <span className="report-value">{total}</span>
+                    </div>
+                    <div className="report-item">
+                      <span className="report-label">Reply Rate</span>
+                      <span className={`report-value ${replyRate >= 20 ? 'positive' : ''}`}>{replyRate}%</span>
+                    </div>
+                    <div className="report-item">
+                      <span className="report-label">Paid Customers</span>
+                      <span className="report-value positive">{paid}</span>
+                    </div>
+                    <div className="report-item">
+                      <span className="report-label">MRR Generated</span>
+                      <span className="report-value positive">${mrr}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
         <button className="btn-add" onClick={() => setShowModal(true)}>
           + Add New Entry
         </button>
@@ -245,6 +430,7 @@ function App() {
                   <th>Name</th>
                   <th>Niche</th>
                   <th>Contact</th>
+                  <th>Status</th>
                   <th>Date</th>
                   <th>Replied</th>
                   <th>Concepts</th>
@@ -258,7 +444,7 @@ function App() {
               <tbody>
                 {entries.length === 0 ? (
                   <tr>
-                    <td colSpan="11" style={{textAlign: 'center', padding: '2rem'}}>
+                    <td colSpan="12" style={{textAlign: 'center', padding: '2rem'}}>
                       No entries yet. Click "Add New Entry" to start tracking!
                     </td>
                   </tr>
@@ -276,6 +462,11 @@ function App() {
                       </td>
                       <td className="niche-cell">{entry.niche}</td>
                       <td>{entry.contactType}</td>
+                      <td>
+                        <span className={getStatusBadgeClass(entry.status || 'Contacted')}>
+                          {entry.status || 'Contacted'}
+                        </span>
+                      </td>
                       <td>{entry.firstMessageDate}</td>
                       <td>{entry.replied ? '✓' : '✗'}</td>
                       <td>{entry.sentConcepts ? '✓' : '✗'}</td>
@@ -369,6 +560,20 @@ function App() {
                 >
                   <option value="DM">DM</option>
                   <option value="Email">Email</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Status *</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                  required
+                >
+                  {STATUS_OPTIONS.map(status => (
+                    <option key={status} value={status}>{status}</option>
+                  ))}
                 </select>
               </div>
 
